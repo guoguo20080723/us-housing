@@ -1,0 +1,85 @@
+---
+title: "U.S. Housing Market"
+author: "Yingtong Guo"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+*All the graphs have been modified in Adobe Illustrator.*
+
+## Housing Value versus Income in Washington, D.C.
+
+```{r 1, eval = FALSE}
+library(ggplot2)
+library(ggthemes)
+library(dplyr)
+
+options(scipen=10)
+
+Black <- blck_grp_1317[["AHY2E003"]] / blck_grp_1317[["AHY2E001"]]
+data_black <- filter(blck_grp_1317, Black >= 0.6)
+data_white <- filter(blck_grp_1317, Black < 0.4)
+
+ggplot(data = blck_grp_1317,
+       mapping = aes(x = AH1PE001 / 1000,
+                     y = AH53E001 / 1000000)) +
+  geom_point(alpha = 0.45, aes(color = Black, size = AHY1E001)) +
+  scale_color_gradient2(low = 'coral3', high = 'royalblue3', 
+                        mid = 'white', midpoint = 0.5) +
+  geom_smooth(data = data_black, color = 'royalblue', se = FALSE)+
+  geom_smooth(data = data_white, color = 'coral', se = FALSE)+
+  
+  labs(x = "Median Household Income In The Past Year (Thousand Dollars)",
+       y = "Median Housing Value (Million Dollars)",
+       title = "Housing Value versus Income in Washington, D.C. (2013-2017)",
+       subtitle = "Communities with higher proportion of black people are disadvantaged",
+       caption = "Data Source: 2017 American Community Survey") +
+  
+  theme_pander(base_size = 16, base_family = "sans") +
+  theme(plot.margin = unit(c(1,1,1,1), "cm"))
+```
+
+![](1.png)
+
+The dataset comes from the 2017 American Community Survey: 5-Year Data. The geographic level is block group and the data only covers DC area. If the dots are closer to blue, the area has higher proportion of black people. If the dots are closer to red, it is the opposite. From the graph, we can see communities with higher proportion of black people tend to have lower income and housing values.
+
+## Median Housing Value by States in the U.S.
+
+```{r 2, eval=FALSE}
+library(ggplot2)
+library(ggthemes)
+library(extrafont)
+
+mutate(STATE = fct_reorder(STATE, AH53E001, .fun='median'))
+
+ggplot(data=county_1317, 
+       aes(x=reorder(STATE, AH53E001),y=AH53E001/1000000)) + 
+  geom_boxplot(outlier.colour="darkred",
+               outlier.fill="darkred",
+               outlier.size=1,
+               alpha=0.4,
+               color="darkred",
+               fill="salmon",
+               na.rm=TRUE)+
+  stat_summary(fun.y=mean, geom="point", 
+               size=1.5, color="brown1") +
+  coord_flip() +
+  
+  labs(y = "Median Housing Value (Million Dollars)",
+       x = "",
+       title = "Median Housing Value across States in the U.S. (2013-2017)",
+       subtitle = "D.C. has the most expensive housing market",
+       caption = "Data Source: 2017 American Community Survey (County Level)") +
+  
+  theme_pander(base_size = 13) +
+  theme(plot.margin = unit(c(1,1,1,1), "cm"))
+
+```
+
+![](2.png)
+
+The dataset comes from the 2017 American Community Survey: 5-Year Data. The geographic level is county and the data covers all the US area. The red points show the means of the distribution. The graph shows which state has relatively high or low median housing values. It also shows how dispersed or compact the distribution is in each state. From the graph, we can see that DC and Hawaii have the highest housing value, while Arkansas and Mississippi have the lowest.
